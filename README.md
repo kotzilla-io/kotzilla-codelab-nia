@@ -116,30 +116,22 @@ one prompt usually clears the lot:
 
 > "My cold startup is over 10 seconds. Find everything that blocks it and fix it."
 
-Expect your assistant to work through all three in one pass, rebuilding and re-measuring as it
-goes. That is the tool working as intended, not it going off-script. Each one is a distinct
-anti-pattern worth reading about as it gets fixed:
+Expect your assistant to fix all three in one pass, rebuilding and re-measuring as it goes. Each is
+a distinct anti-pattern:
 
-**`Application.onCreate`** runs synchronous "warm-up" work before any Activity can start. The most
-expensive place to be slow: every user pays it, every launch, before seeing anything. The fix
-removes it; anything genuinely needed at startup belongs on a background thread or deferred until
-first use.
+- **`Application.onCreate`** does synchronous work before any Activity can start. The most
+  expensive place to be slow: every user pays it, every launch, before seeing anything.
+- **`MainActivityViewModel`** takes ~5s to resolve on the main thread while the screen waits. The
+  tell is in the dependency tree: its whole subtree costs single-digit milliseconds against a
+  multi-second resolution, so the time is inside the constructor. A slow constructor, not a heavy
+  graph. Past 4.5s of blocked rendering it also becomes an **ANR**. A ViewModel should expose state
+  as a `StateFlow` and load in `viewModelScope`, never in its constructor.
+- **The sync worker** (`androidx.work.ListenableWorker`) blocks ~2s while being created. It runs
+  off the UI thread, so it is tempting to skip, but it starts from `Application.onCreate` and
+  resolves inside the cold-start window. A `CoroutineWorker` does its work in `doWork`, and
+  construction stays instant.
 
-**`MainActivityViewModel`** takes about 5 seconds to resolve, on the main thread, while the screen
-waits. Component resolution runs on the main thread by default, so a slow constructor freezes the
-UI, and past 4.5 seconds of blocked rendering Kotzilla flags it as an **ANR** on top of the
-slow-screen and main-thread issues. The tell is in the dependency tree: the whole subtree costs
-single-digit milliseconds against a multi-second resolution, so the time is self time in the
-constructor. A slow constructor, not a heavy graph. The fix removes the synchronous wait: a
-ViewModel exposes state as a `StateFlow` and loads in `viewModelScope`, never in its constructor.
-
-**The sync worker** (`androidx.work.ListenableWorker`) spends about 2 seconds blocked while being
-created. It runs off the UI thread, so it is tempting to leave alone, but it is started from
-`Application.onCreate` and resolves inside the cold-start window, so it counts. The fix removes the
-check; a `CoroutineWorker` does its work in `doWork`, on the injected dispatcher, and its
-construction stays instant.
-
-If your assistant stops after the first component, point it at the rest:
+If your assistant stops after the first one, point it at the rest:
 
 > "MainActivityViewModel is still blocking the main thread. Diagnose it with Kotzilla and fix it."
 
@@ -147,23 +139,21 @@ If your assistant stops after the first component, point it at the rest:
 
 ### 4.3 One more, and this one is not ours
 
-Once the planted issues are gone, the report still shows a **slow transition** of roughly 700ms on
-`InterestsRoute`, and similar numbers on Search and Saved. We did not plant that one. It is real,
-it ships in Now in Android today, and it is a good example of what the tooling finds when nobody
-put it there on purpose.
+With the planted issues gone, the report still shows a **slow transition** of roughly 700ms on
+`InterestsRoute`, and similar numbers on Search and Saved. We did not plant that one. It ships in
+Now in Android today.
 
 > "Now fix the slow transition on InterestsRoute."
 
-The timeline is the whole story: the screen draws in about 11ms, then takes another ~700ms to reach
-`RESUMED`. Nothing runs on the main thread in between. Three unrelated destinations landing on
-nearly the same number is the clue: it is one shared cause, not three coincidences.
+The timeline tells it: the screen draws in ~11ms, then takes another ~700ms to reach `RESUMED`,
+with nothing on the main thread in between. Three unrelated destinations landing on nearly the same
+number is the clue that one shared cause is behind all of them.
 
 **What the fix looks like:** `NavHost` defaults to a 700ms crossfade, and a destination is not
-interactive until that animation finishes. Overriding `enterTransition`/`exitTransition` to
-200ms, inside Android's recommended 200-300ms band, gets the time back. Worth noticing that this
-is a real UX decision, not just a metric: the delay *is* the animation.
+interactive until it finishes. Overriding `enterTransition`/`exitTransition` to 200ms gets the time
+back. Note this is a real UX decision, not just a metric: the delay *is* the animation.
 
-This one is optional. Leaving it unfixed does not count against your completion.
+Optional. Leaving it does not count against your completion.
 
 ## Step 5: Capture the "after" session
 
@@ -185,25 +175,18 @@ that gets compared.
 ## Step 6: Check what you fixed
 
 Do not ask for another health report. A report grades the whole app against absolute thresholds,
-and on an emulator it will say FAIL whatever you do, because cold start alone sits above the line.
-That is not the question. The question is whether the issues you were given are gone. Ask that
-directly:
+and on an emulator it says FAIL whatever you do, because cold start alone sits above the line. The
+question is whether the issues you were given are gone. Ask that:
 
-> "On Kotzilla, check my latest version against codelab-1.0 for these six issues specifically: the
-> crash on Interests, the ANR on MainActivity, the slow MainActivity screen, the slow warm startup,
-> MainActivityViewModel blocking the main thread, and ListenableWorker blocking a background
-> thread. Also compare cold startup time. For each one, say whether it is gone or how far it
-> dropped."
+> "On Kotzilla, take each issue from codelab-1.0 and tell me whether it is gone in my latest
+> version, or how far it dropped."
 
-Naming them keeps the answer to the point. A blanket "compare everything" also works, but it
-returns every difference between two small samples on one emulator, including changes you did not
-cause, and you then have to sort the signal out yourself.
+Scoping it to `codelab-1.0`'s issues is what keeps the answer useful. Ask for a general comparison
+instead and you get every difference between two small samples on one emulator, including things
+you never caused, and you have to sort them out yourself.
 
-Your assistant pulls the issue list for both versions through MCP and lines them up. Each issue
-records which versions it was seen on, so this is a plain fact rather than a judgement: an issue
-that no longer lists your latest version is fixed.
-
-You are done when this holds:
+Each issue records the versions it was seen on, so "gone" is a fact rather than a judgement. You
+are done when this holds:
 
 | From `codelab-1.0` | Expected |
 | --- | --- |
@@ -212,17 +195,15 @@ You are done when this holds:
 | Slow screen on `MainActivity` (~5s) | Gone |
 | Slow warm startup | Gone |
 | `MainActivityViewModel` blocking the main thread (~5s) | Gone |
-| `ListenableWorker` blocking a background thread (~2s) | Down to a few hundred ms. It may still be listed: resolving a component that size costs that much on an emulator with nothing wrong. |
-| Cold startup (~15s) | Down to a few seconds. Still listed, for the same reason. |
+| `ListenableWorker` blocking a background thread (~2s) | Gone, or down to a few hundred ms |
+| Cold startup (~15s) | Down to a few seconds. Usually still listed: an emulator crosses that threshold on its own. |
 
-The last two are the ones to read as magnitudes. Everything else should simply stop appearing.
+Read the last two as magnitudes. The rest should simply stop appearing.
 
-If you do run a blanket comparison, expect it to flag something as regressed or new. That does not
-mean you broke it. The usual one is `okhttp3.Call$Factory` on a background thread, which appears
-only because your app is now fast enough to reach image loading inside the measured window; in
-`codelab-1.0` it sat behind eleven seconds of blocking and never got measured. Going faster made it
-visible. Slow screens on `ForYouRoute` come from launches whose database was still filling for the
-first time. Neither is in the table above, and neither counts. 🎉
+Two things may still show up that you did not cause: a slow `ForYouRoute` on a launch whose
+database was still filling for the first time, and `okhttp3.Call$Factory` on a background thread,
+which becomes visible only because your app is now fast enough to reach image loading inside the
+measured window. Neither is in the table. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 
