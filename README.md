@@ -7,7 +7,7 @@ Kotzilla Codelab: Fix Now in Android
 
 This app is a version of Google's **[Now in Android](https://github.com/android/nowinandroid)** where
 Dagger Hilt is replaced by **Koin** (Koin Compiler Plugin), instrumented with the **Kotzilla SDK**.
-It ships with **intentionally planted performance and stability bugs**. Your mission: use the
+It ships with **performance and stability bugs we introduced on purpose**. Your mission: use the
 **Kotzilla MCP server** and your AI assistant to detect them from real runtime sessions, root-cause
 them, fix them, and prove it with a before/after report.
 
@@ -139,8 +139,8 @@ If your assistant stops after the first one, point it at the rest:
 
 ### 4.3 One more, and this one is not ours
 
-With the planted issues gone, the report still shows a **slow transition** of roughly 700ms on
-`InterestsRoute`, and similar numbers on Search and Saved. We did not plant that one. It ships in
+With the issues we introduced gone, the report still shows a **slow transition** of roughly 700ms
+on `InterestsRoute`, and similar numbers on Search and Saved. We did not add that one. It ships in
 Now in Android today.
 
 > "Now fix the slow transition on InterestsRoute."
@@ -175,8 +175,8 @@ The check is a comparison: the issues you were given in `codelab-1.0`, against y
 > issues on MainActivity, MainActivityViewModel and ListenableWorker. For each one: gone, or how
 > far did it drop?"
 
-Those four components carry everything that was planted. Each issue records which versions it
-appeared on, so "gone" is a fact rather than a judgement. Expect this:
+Those four components carry everything we introduced. Each issue records which versions it
+appeared on, so "gone" is a fact, not an opinion. Expect this:
 
 | From `codelab-1.0` | Expected |
 | --- | --- |
@@ -188,7 +188,8 @@ appeared on, so "gone" is a fact rather than a judgement. Expect this:
 | `ListenableWorker` blocking a background thread (~2s) | Gone, or down to a few hundred ms |
 | Cold startup (~15s) | Down to a few seconds. Usually still listed: an emulator crosses that threshold on its own. |
 
-Read the last two rows as magnitudes. The rest should stop appearing.
+For the last two rows, look at how far the number dropped, not at whether the entry disappeared.
+The rest should stop appearing.
 
 We are not using the report status here, only the table above. Your build can still carry other
 issues that keep the report failing, and that is fine: they are not what you were asked to fix. 🎉
