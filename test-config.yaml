@@ -1,0 +1,24 @@
+# Test automation config for Now in Android (Workshop 2025)
+
+project:
+  name: "nowinandroid-agp8-koin4.2"
+  display_name: "Now in Android"
+
+android:
+  module: "app"
+  base_package: "com.google.samples.apps.nowinandroid"
+  activity_class: "com.google.samples.apps.nowinandroid.MainActivity"
+
+  flavors:
+    demo:
+      package_suffix: ".demo"
+    prod:
+
+  build_types:
+    debug:
+      package_suffix: ".debug"
+    release:
+
+  # Optional: override deduced APK path for specific variants
+  # apk_overrides:
+  #   demoRelease: "app/build/outputs/apk/demo/release/app-demo-release.apk"
