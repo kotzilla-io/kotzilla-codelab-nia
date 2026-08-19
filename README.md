@@ -78,7 +78,7 @@ another minute and ask again.
 
 ## Step 4: Diagnose and fix, issue by issue
 
-Work top-down: the crash first, then startup, then the blocking components.
+Work top-down: the crash first, then everything blocking startup.
 For each issue: read what is going on, optionally look at it in the
 [Kotzilla Console](https://console.kotzilla.io/) (issues view, screen details, session timeline),
 then hand it to your assistant. The assistant pulls the dependency trees, timings, and stack traces
@@ -106,43 +106,63 @@ on the next launch.
 met, so construction always throws. The fix removes that check (or makes the configuration truly
 optional) so the ViewModel can be created.
 
-### 4.2 Slow cold startup
+### 4.2 Startup: everything that blocks the first frame
 
-The report shows a cold start above 10 seconds. Blocking work during `Application.onCreate` delays
-the first frame of every single launch, and it is the most expensive place to be slow: every user
-pays it, every time, before seeing anything.
+The report shows a cold start above 10 seconds, an **ANR** and a slow screen on MainActivity, a
+main-thread issue on `MainActivityViewModel`, and a background-thread issue on the sync worker.
+That reads like five problems. It is three blocking components, all inside the startup window, and
+one prompt usually clears the lot:
 
-> "My cold startup is over 10 seconds. Find what blocks it and fix it."
+> "My cold startup is over 10 seconds. Find everything that blocks it and fix it."
 
-**What the fix looks like:** `Application.onCreate` runs synchronous "warm-up" work that blocks the
-main thread. The fix removes it; anything genuinely needed at startup belongs on a background
-thread or deferred until first use.
+Expect your assistant to work through all three in one pass, rebuilding and re-measuring as it
+goes. That is the tool working as intended, not it going off-script. Each one is a distinct
+anti-pattern worth reading about as it gets fixed:
 
-### 4.3 Main-thread blocking and ANR: the MainActivity screen
+**`Application.onCreate`** runs synchronous "warm-up" work before any Activity can start. The most
+expensive place to be slow: every user pays it, every launch, before seeing anything. The fix
+removes it; anything genuinely needed at startup belongs on a background thread or deferred until
+first use.
 
-`MainActivityViewModel` takes about 5 seconds to resolve, on the main thread, while the screen
+**`MainActivityViewModel`** takes about 5 seconds to resolve, on the main thread, while the screen
 waits. Component resolution runs on the main thread by default, so a slow constructor freezes the
-UI, and past 4.5 seconds of blocked rendering Kotzilla flags it as an **ANR** (Application Not
-Responding), on top of the slow-screen and main-thread issues. Keep construction cheap; move heavy
-work to coroutines on background dispatchers.
+UI, and past 4.5 seconds of blocked rendering Kotzilla flags it as an **ANR** on top of the
+slow-screen and main-thread issues. The tell is in the dependency tree: the whole subtree costs
+single-digit milliseconds against a multi-second resolution, so the time is self time in the
+constructor. A slow constructor, not a heavy graph. The fix removes the synchronous wait: a
+ViewModel exposes state as a `StateFlow` and loads in `viewModelScope`, never in its constructor.
 
-> "MainActivityViewModel is blocking the main thread. Diagnose it with Kotzilla and fix it."
+**The sync worker** (`androidx.work.ListenableWorker`) spends about 2 seconds blocked while being
+created. It runs off the UI thread, so it is tempting to leave alone, but it is started from
+`Application.onCreate` and resolves inside the cold-start window, so it counts. The fix removes the
+check; a `CoroutineWorker` does its work in `doWork`, on the injected dispatcher, and its
+construction stays instant.
 
-**What the fix looks like:** the ViewModel blocks its constructor waiting for data. The fix removes
-the synchronous wait: a ViewModel exposes its state as a `Flow`/`StateFlow` and loads data in
-`viewModelScope`, never in its constructor.
+If your assistant stops after the first component, point it at the rest:
 
-### 4.4 Background-thread blocking: the sync worker
+> "MainActivityViewModel is still blocking the main thread. Diagnose it with Kotzilla and fix it."
 
-The data sync worker (`androidx.work.ListenableWorker`) spends about 2 seconds blocked while being
-created. Off-UI work still hurts: it ties up the WorkManager thread, delays the first data sync,
-and wastes resources.
+> "Now analyze the background thread issue on the sync worker and fix it."
 
-> "Analyze the background thread issue on the sync worker and fix it."
+### 4.3 One more, and this one is not ours
 
-**What the fix looks like:** the worker blocks its constructor with a synchronous environment
-check. The fix removes it; a `CoroutineWorker` does its work in `doWork`, on the injected
-dispatcher, and its construction stays instant.
+Once the planted issues are gone, the report still shows a **slow transition** of roughly 700ms on
+`InterestsRoute`, and similar numbers on Search and Saved. We did not plant that one. It is real,
+it ships in Now in Android today, and it is a good example of what the tooling finds when nobody
+put it there on purpose.
+
+> "Now fix the slow transition on InterestsRoute."
+
+The timeline is the whole story: the screen draws in about 11ms, then takes another ~700ms to reach
+`RESUMED`. Nothing runs on the main thread in between. Three unrelated destinations landing on
+nearly the same number is the clue: it is one shared cause, not three coincidences.
+
+**What the fix looks like:** `NavHost` defaults to a 700ms crossfade, and a destination is not
+interactive until that animation finishes. Overriding `enterTransition`/`exitTransition` to
+200ms, inside Android's recommended 200-300ms band, gets the time back. Worth noticing that this
+is a real UX decision, not just a metric: the delay *is* the animation.
+
+This one is optional. Leaving it unfixed does not count against your completion.
 
 ### Along the way: component lifetimes
 
@@ -167,9 +187,10 @@ instance in memory.
 
 Your assistant pulls both version-scoped reports through MCP and builds the comparison. **Success is
 the delta, not a green banner**: crashes down to zero, ANRs down to zero, the MainActivity,
-MainActivityViewModel, and sync-worker issues gone, and cold start massively reduced. On a slower
-emulator the after report may still mention cold-start or first-composition times; those are
-environmental and do not count against you. 🎉
+MainActivityViewModel, and sync-worker issues gone, and cold start massively reduced. The report
+can still be FAIL and you can still have finished: a slower emulator keeps reporting cold-start and
+first-composition times that are environmental, and the slow transition from 4.3 is optional.
+Neither counts against you. 🎉
 
 Take a screenshot of the codelab-2.0 report, same as in Step 3.
 
