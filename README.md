@@ -177,10 +177,19 @@ This one is optional. Leaving it unfixed does not count against your completion.
 4. Now run the Step 2 navigation path **twice** (this time Interests should not crash).
 5. Background or close the app, then wait about a minute.
 
+**If a run goes wrong, bump the version and redo it.** A version is a permanent measurement
+bucket: reports aggregate every session ever recorded against it, and with only a handful of
+sessions a single bad one sets the P95. An ANR is worse, since it is a counted event that no
+amount of good runs can average away. So if you forget the warm-up, or a run gets interrupted,
+do not try to fix it by running again on the same version. Set `versionName` to `codelab-2.1`,
+rebuild, and measure clean. Submit whichever `codelab-2.x` you measured properly.
+
 ## Step 6: The before/after comparison
 
 > "Generate a Kotzilla report for version codelab-2.0, compare it with the codelab-1.0 report, and
 > summarize what changed."
+
+(Use whichever `codelab-2.x` you actually measured, if a redo moved you off `codelab-2.0`.)
 
 Your assistant pulls both version-scoped reports through MCP and builds the comparison. **Success is
 the delta, not a green banner**: crashes down to zero, ANRs down to zero, the MainActivity,
@@ -193,18 +202,18 @@ can still be FAIL and you can still have finished. None of these count against y
   Step 5 asks for a warm-up launch. If you see it, you measured a launch that started with an
   empty database. 🎉
 
-Take a screenshot of the codelab-2.0 report, same as in Step 3.
+Take a screenshot of that report, same as in Step 3.
 
 The same story is visible in the [Kotzilla Console](https://console.kotzilla.io/): open the
-**Dashboard**, switch the version filter between `codelab-1.0` and `codelab-2.0`, and watch the
+**Dashboard**, switch the version filter between `codelab-1.0` and your final version, and watch the
 issues, ANRs, startup times, and screen renderings improve between the two versions.
 
 <!-- TODO(miguel): add a Console dashboard screenshot here, version filter on codelab-2.0 vs codelab-1.0 -->
 
 ## Completing the codelab
 
-Email **both saved reports** (the codelab-1.0 "before" and the codelab-2.0 "after") plus your
-**app name** as registered on Kotzilla to **codelab@kotzilla.io**. We verify completions
+Email **both saved reports** (the codelab-1.0 "before" and your final codelab-2.x "after") plus
+your **app name** as registered on Kotzilla to **codelab@kotzilla.io**. We verify completions
 server-side. Every completer gets a shout-out, and completions enter a prize draw.
 
 ---
