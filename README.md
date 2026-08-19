@@ -194,11 +194,13 @@ Expect this:
 
 Read the last two rows as magnitudes. The rest should stop appearing.
 
-Judge yourself on that table, not on the report's overall status, which grades the whole app
-against absolute thresholds and stays FAIL on an emulator whatever you do. Two other entries may
-appear that you did not cause: a slow `ForYouRoute` on a launch whose database was still filling
-for the first time, and `okhttp3.Call$Factory` on a background thread, visible only because your
-app is now fast enough to reach image loading inside the measured window. 🎉
+Judge yourself on that table rather than on the report's overall status. The report is a release
+gate: it grades the whole app against production thresholds, which is what you want in CI, but here
+you are asking a narrower question, and a desktop emulator is slow enough at cold start to trip the
+gate on its own. Two other entries may appear that you did not cause: a slow `ForYouRoute` on a
+launch whose database was still filling for the first time, and `okhttp3.Call$Factory` on a
+background thread, visible only because your app is now fast enough to reach image loading inside
+the measured window. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 
@@ -233,8 +235,8 @@ gets a shout-out, and completions enter a prize draw.
   slow transitions) into component-level evidence with the Kotzilla Platform.
 - Letting an AI assistant fix issues from real dependency graphs and session timings instead of
   guessing from code.
-- Proving a fix with version-scoped before/after reports, the same mechanism you would use as a
-  release gate in CI.
+- Proving a fix by comparing versions on the platform, and knowing when to reach for that instead
+  of the overall report status, which is the release gate you would wire into CI.
 
 ---
 
