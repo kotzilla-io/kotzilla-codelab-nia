@@ -161,16 +161,11 @@ Optional. Leaving it does not count against your completion.
    not matter, `codelab-2.0` is a fine choice. What matters is that this build is the newest one,
    so it is the one Step 6 compares against `codelab-1.0`.
 2. Rebuild and install.
-3. Run the Step 2 navigation path **twice** (this time Interests should not crash). Run it twice
-   because the first launch after installing a new build is slower: the runtime is still compiling
-   it, which inflates cold start by several seconds for reasons that have nothing to do with your
-   code.
+3. Run the Step 2 navigation path **twice** (this time Interests should not crash). The first
+   launch after installing a new build is slower because the runtime is still compiling it, so the
+   second run is the one that measures your code. If a run gets interrupted, bump the version and
+   redo this step: sessions stick to a version permanently.
 4. Background or close the app, then wait about a minute.
-
-**If a run goes wrong, bump the version again and redo it.** A version is a permanent bucket:
-every session ever recorded against it counts, so one bad run keeps affecting it and re-running on
-the same version cannot undo that. Bumping costs nothing here, and the newest version is the one
-that gets compared.
 
 ## Step 6: Check what you fixed
 
