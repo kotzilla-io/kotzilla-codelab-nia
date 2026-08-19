@@ -169,20 +169,15 @@ This one is optional. Leaving it unfixed does not count against your completion.
 1. In `app/build.gradle.kts`, set `versionName` to `codelab-2.0` (you will be on whatever
    intermediate version Step 4 left you on, not on `codelab-1.0`), and bump `versionCode`.
 2. Rebuild and install.
-3. **Launch the app once and wait for the feed to fill with articles, then close it.** The first
-   launch on a fresh install downloads the article catalog, and the **For You** screen cannot
-   render until the topics land. Measure that launch and you record a network wait as if it were
-   your code: it shows up as a slow screen or even an ANR on `ForYouRoute`, on a screen you never
-   touched. This warm-up run is not measured, so leave it out of your report.
-4. Now run the Step 2 navigation path **twice** (this time Interests should not crash).
-5. Background or close the app, then wait about a minute.
+3. Run the Step 2 navigation path **twice** (this time Interests should not crash).
+4. Background or close the app, then wait about a minute.
 
 **If a run goes wrong, bump the version and redo it.** A version is a permanent measurement
 bucket: reports aggregate every session ever recorded against it, and with only a handful of
 sessions a single bad one sets the P95. An ANR is worse, since it is a counted event that no
-amount of good runs can average away. So if you forget the warm-up, or a run gets interrupted,
-do not try to fix it by running again on the same version. Set `versionName` to `codelab-2.1`,
-rebuild, and measure clean. Submit whichever `codelab-2.x` you measured properly.
+amount of good runs can average away. So if a run gets interrupted or goes wrong, do not try to
+fix it by running again on the same version. Set `versionName` to `codelab-2.1`, rebuild, and
+measure clean. Submit whichever `codelab-2.x` you measured properly.
 
 ## Step 6: The before/after comparison
 
@@ -191,16 +186,25 @@ rebuild, and measure clean. Submit whichever `codelab-2.x` you measured properly
 
 (Use whichever `codelab-2.x` you actually measured, if a redo moved you off `codelab-2.0`.)
 
-Your assistant pulls both version-scoped reports through MCP and builds the comparison. **Success is
-the delta, not a green banner**: crashes down to zero, ANRs down to zero, the MainActivity,
-MainActivityViewModel, and sync-worker issues gone, and cold start massively reduced. The report
-can still be FAIL and you can still have finished. None of these count against you:
+Your assistant pulls both version-scoped reports through MCP and builds the comparison.
 
-- Cold-start and first-composition times on a slow emulator. Environmental.
-- The slow transition from 4.3. Optional.
-- A slow screen or ANR on `ForYouRoute`. That is the first-run catalog download, which is why
-  Step 5 asks for a warm-up launch. If you see it, you measured a launch that started with an
-  empty database. 🎉
+**Expect the after report to still say FAIL, and finish anyway.** You are running on an emulator,
+where cold start alone sits above the threshold no matter how good your code is. A green banner is
+not the goal and chasing one will waste your time. What matters is that the specific issues you
+were given are gone:
+
+| Was in `codelab-1.0` | Should be absent in your final version |
+| --- | --- |
+| Crash on the Interests screen | no crashes |
+| Slow cold start and warm start | startup down by several seconds |
+| ANR and slow screen on `MainActivity` | neither |
+| `MainActivityViewModel` blocking the main thread | absent |
+| `ListenableWorker` blocking a background thread | absent |
+
+That is the checklist we verify against, and it is the only one. Anything else the report mentions
+is not something you failed to fix: emulator startup and first-composition times, the optional slow
+transition from 4.3, or a slow `ForYouRoute` on a launch where the feed was still filling for the
+first time. Report FAIL with that table satisfied means you finished. 🎉
 
 Take a screenshot of that report, same as in Step 3.
 
