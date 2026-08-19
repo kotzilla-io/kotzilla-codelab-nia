@@ -186,8 +186,15 @@ and on an emulator it will say FAIL whatever you do, because cold start alone si
 That is not the question. The question is whether the issues you were given are gone. Ask that
 directly:
 
-> "Compare version codelab-1.0 with my latest version on Kotzilla. For every issue that was in
-> codelab-1.0, tell me whether it is gone, reduced, or unchanged, with the numbers."
+> "On Kotzilla, check my latest version against codelab-1.0 for these six issues specifically: the
+> crash on Interests, the ANR on MainActivity, the slow MainActivity screen, the slow warm startup,
+> MainActivityViewModel blocking the main thread, and ListenableWorker blocking a background
+> thread. Also compare cold startup time. For each one, say whether it is gone or how far it
+> dropped."
+
+Naming them keeps the answer to the point. A blanket "compare everything" also works, but it
+returns every difference between two small samples on one emulator, including changes you did not
+cause, and you then have to sort the signal out yourself.
 
 Your assistant pulls the issue list for both versions through MCP and lines them up. Each issue
 records which versions it was seen on, so this is a plain fact rather than a judgement: an issue
@@ -207,19 +214,12 @@ You are done when this holds:
 
 The last two are the ones to read as magnitudes. Everything else should simply stop appearing.
 
-**The comparison will probably also report something as regressed or new. That does not mean you
-broke it.** Two show up regularly:
-
-- **`ForYouRoute` slow, sometimes an ANR.** The For You feed cannot render until the first sync
-  fills the database. If any of your launches started from an empty database, that one session
-  spent seconds waiting on it. Nothing you wrote is involved.
-- **`okhttp3.Call$Factory` blocking a background thread.** This is new only because your app is now
-  fast enough to reach image loading inside the measured window. In `codelab-1.0` it sat behind
-  eleven seconds of blocking, so it never got measured. Going faster made it visible.
-
-Both are artefacts of measuring a small number of runs on an emulator, and neither is in the table
-above. The same goes for the optional slow transition from 4.3 if you skipped it. Read the table,
-not the totals. 🎉
+If you do run a blanket comparison, expect it to flag something as regressed or new. That does not
+mean you broke it. The usual one is `okhttp3.Call$Factory` on a background thread, which appears
+only because your app is now fast enough to reach image loading inside the measured window; in
+`codelab-1.0` it sat behind eleven seconds of blocking and never got measured. Going faster made it
+visible. Slow screens on `ForYouRoute` come from launches whose database was still filling for the
+first time. Neither is in the table above, and neither counts. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 

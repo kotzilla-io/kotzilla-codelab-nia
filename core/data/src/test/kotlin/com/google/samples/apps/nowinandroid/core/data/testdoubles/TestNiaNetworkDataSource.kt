@@ -16,6 +16,7 @@
 
 package com.google.samples.apps.nowinandroid.core.data.testdoubles
 
+import JvmUnitTestDemoAssetManager
 import com.google.samples.apps.nowinandroid.core.network.NiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.demo.DemoNiaNetworkDataSource
 import com.google.samples.apps.nowinandroid.core.network.model.NetworkChangeList
@@ -38,6 +39,7 @@ class TestNiaNetworkDataSource : NiaNetworkDataSource {
     private val source = DemoNiaNetworkDataSource(
         UnconfinedTestDispatcher(),
         Json { ignoreUnknownKeys = true },
+        JvmUnitTestDemoAssetManager,
     )
 
     private val allTopics = runBlocking { source.getTopics() }
