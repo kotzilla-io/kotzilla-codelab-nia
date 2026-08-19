@@ -89,8 +89,9 @@ session, so after every fix your assistant bumps `versionName` in `app/build.gra
 re-runs the app, and re-checks the issue on that new version. Let it. Intermediate names like
 `codelab-1.1`, `codelab-1.2` are fine, whatever it picks.
 
-The only thing that matters for completion: once **all** the fixes are in, the final build must be
-`codelab-2.0`. That is the version Step 5 measures and the one you submit.
+The only thing that matters for completion is that your **last** build is the one with all the
+fixes in it. Step 6 compares `codelab-1.0` against whatever version is newest, so the names in
+between are yours to pick.
 
 ### 4.1 The crash: Interests tab
 
@@ -166,59 +167,73 @@ This one is optional. Leaving it unfixed does not count against your completion.
 
 ## Step 5: Capture the "after" session
 
-1. In `app/build.gradle.kts`, set `versionName` to `codelab-2.0` (you will be on whatever
-   intermediate version Step 4 left you on, not on `codelab-1.0`), and bump `versionCode`.
+1. In `app/build.gradle.kts`, bump `versionName` and `versionCode` one last time. The name does
+   not matter, `codelab-2.0` is a fine choice. What matters is that this build is the newest one,
+   so it is the one Step 6 compares against `codelab-1.0`.
 2. Rebuild and install.
 3. Run the Step 2 navigation path **twice** (this time Interests should not crash).
 4. Background or close the app, then wait about a minute.
 
-**If a run goes wrong, bump the version and redo it.** A version is a permanent measurement
-bucket: reports aggregate every session ever recorded against it, and with only a handful of
-sessions a single bad one sets the P95. An ANR is worse, since it is a counted event that no
-amount of good runs can average away. So if a run gets interrupted or goes wrong, do not try to
-fix it by running again on the same version. Set `versionName` to `codelab-2.1`, rebuild, and
-measure clean. Submit whichever `codelab-2.x` you measured properly.
+**If a run goes wrong, bump the version again and redo it.** A version is a permanent bucket:
+every session ever recorded against it counts, so one bad run keeps affecting it and re-running on
+the same version cannot undo that. Bumping costs nothing here, and the newest version is the one
+that gets compared.
 
-## Step 6: The before/after comparison
+## Step 6: Check what you fixed
 
-> "Generate a Kotzilla report for version codelab-2.0, compare it with the codelab-1.0 report, and
-> summarize what changed."
+Do not ask for another health report. A report grades the whole app against absolute thresholds,
+and on an emulator it will say FAIL whatever you do, because cold start alone sits above the line.
+That is not the question. The question is whether the issues you were given are gone. Ask that
+directly:
 
-(Use whichever `codelab-2.x` you actually measured, if a redo moved you off `codelab-2.0`.)
+> "Compare version codelab-1.0 with my latest version on Kotzilla. For every issue that was in
+> codelab-1.0, tell me whether it is gone, reduced, or unchanged, with the numbers."
 
-Your assistant pulls both version-scoped reports through MCP and builds the comparison.
+Your assistant pulls the issue list for both versions through MCP and lines them up. Each issue
+records which versions it was seen on, so this is a plain fact rather than a judgement: an issue
+that no longer lists your latest version is fixed.
 
-**Expect the after report to still say FAIL, and finish anyway.** You are running on an emulator,
-where cold start alone sits above the threshold no matter how good your code is. A green banner is
-not the goal and chasing one will waste your time. What matters is that the specific issues you
-were given are gone:
+You are done when this holds:
 
-| Was in `codelab-1.0` | Should be absent in your final version |
+| From `codelab-1.0` | Expected |
 | --- | --- |
-| Crash on the Interests screen | no crashes |
-| Slow cold start and warm start | startup down by several seconds |
-| ANR and slow screen on `MainActivity` | neither |
-| `MainActivityViewModel` blocking the main thread | absent |
-| `ListenableWorker` blocking a background thread | absent |
+| Crash on the Interests screen | Gone |
+| ANR on `MainActivity` | Gone |
+| Slow screen on `MainActivity` (~5s) | Gone |
+| Slow warm startup | Gone |
+| `MainActivityViewModel` blocking the main thread (~5s) | Gone |
+| `ListenableWorker` blocking a background thread (~2s) | Down to a few hundred ms. It may still be listed: resolving a component that size costs that much on an emulator with nothing wrong. |
+| Cold startup (~15s) | Down to a few seconds. Still listed, for the same reason. |
 
-That is the checklist we verify against, and it is the only one. Anything else the report mentions
-is not something you failed to fix: emulator startup and first-composition times, the optional slow
-transition from 4.3, or a slow `ForYouRoute` on a launch where the feed was still filling for the
-first time. Report FAIL with that table satisfied means you finished. 🎉
+The last two are the ones to read as magnitudes. Everything else should simply stop appearing.
 
-Take a screenshot of that report, same as in Step 3.
+Anything in the list that is not in that table is not something you failed to fix: the optional
+slow transition from 4.3, or a slow `ForYouRoute` on a launch whose database started empty and was
+still filling. 🎉
 
-The same story is visible in the [Kotzilla Console](https://console.kotzilla.io/): open the
-**Dashboard**, switch the version filter between `codelab-1.0` and your final version, and watch the
-issues, ANRs, startup times, and screen renderings improve between the two versions.
+**Take a screenshot of that comparison.** It is what you send in.
 
-<!-- TODO(miguel): add a Console dashboard screenshot here, version filter on codelab-2.0 vs codelab-1.0 -->
+The same story is visible in the [Kotzilla Console](https://console.kotzilla.io/). Open the
+**Dashboard** and use the version filter to move between `codelab-1.0` and your final version, or
+just read the two panels side by side: the app across all versions against the latest one on its
+own.
+
+![Kotzilla Console dashboard showing the codelab versions](docs/images/console-dashboard.png)
+
+Every version you built along the way is listed, and the health of the newest one is reported
+separately from the app as a whole. The screen table underneath is the same data Step 6 compares,
+per screen, with ANR counts.
 
 ## Completing the codelab
 
-Email **both saved reports** (the codelab-1.0 "before" and your final codelab-2.x "after") plus
-your **app name** as registered on Kotzilla to **codelab@kotzilla.io**. We verify completions
-server-side. Every completer gets a shout-out, and completions enter a prize draw.
+Email **codelab@kotzilla.io** with:
+
+- your **app name** as registered on Kotzilla,
+- the **name of your final version**,
+- the Step 3 "before" screenshot and the Step 6 comparison screenshot.
+
+We check the rest server-side, against the same table in Step 6 and nothing else. Every completer
+gets a shout-out, and completions enter a prize draw.
 
 ---
 
