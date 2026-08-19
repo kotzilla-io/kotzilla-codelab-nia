@@ -43,7 +43,7 @@ claude mcp add kotzilla --transport http https://mcp.kotzilla.io/mcp
 
 No SDK key is bundled. Ask your assistant to set it up for you, in your own words, for example:
 
-> "Register this app on Kotzilla and configure the SDK key."
+> "Register this app on Kotzilla and configure the SDK."
 
 The MCP server guides the assistant through app registration and returns a `kotzilla.json`; the
 assistant pastes it into `app/`. The SDK and Koin libraries are already wired into the project.
@@ -58,11 +58,10 @@ Build and install the app (`./gradlew :app:installDemoDebug`), then run this nav
 2. On the **For You** screen, follow a topic and scroll the feed.
 3. Open **Search** (the magnifier, top left) and search for "compose".
 4. Open the **Saved** tab.
-5. Rotate the device a few times (portrait, landscape, portrait).
-6. Open the **Interests** tab. The app crashes. 💥 That crash is part of the codelab.
-7. **Relaunch the app** and let it load: this uploads the crashed session. Then send the app to the
+5. Open the **Interests** tab. The app crashes. 💥 That crash is part of the codelab.
+6. **Relaunch the app** and let it load: this uploads the crashed session. Then send the app to the
    background (home button) or close it.
-8. Wait about a minute for the session to be processed.
+7. Wait about a minute for the session to be processed.
 
 ## Step 3: The "before" report
 
@@ -70,11 +69,12 @@ Ask your assistant:
 
 > "Generate a Kotzilla report for this app, version codelab-1.0."
 
-You get a **FAIL** report listing the detected issues: a crash, a slow cold start, an ANR, slow
-screens, and blocking components. If the report shows no data yet, wait another minute and ask again.
+You get a **FAIL** report listing around a dozen detected issues: a crash, a slow cold start, an
+ANR, slow screens, and blocking components. The exact count varies with your device and how you
+navigated, so do not worry if you see a few more or fewer. If the report shows no data yet, wait
+another minute and ask again.
 
-**Save this report**: copy the text into a file (for example `before-report.txt`) or take a
-screenshot. You will attach it when you complete the codelab.
+**Take a screenshot of this report.** You will attach it when you complete the codelab.
 
 ## Step 4: Diagnose and fix, issue by issue
 
@@ -84,10 +84,13 @@ For each issue: read what is going on, optionally look at it in the
 then hand it to your assistant. The assistant pulls the dependency trees, timings, and stack traces
 from your real session through MCP, finds the root cause, and edits the code.
 
-You can apply all the fixes before rebuilding: one rebuild as `codelab-2.0` in Step 5 verifies
-everything at once. If your assistant proposes intermediate rebuilds to verify each fix (the MCP
-fix flow suggests a new version per verification), that works too: name them `codelab-1.1`,
-`codelab-1.2`, and keep `codelab-2.0` for the final run.
+**Expect the version to change as you go.** The MCP fix flow verifies each fix against a fresh
+session, so after every fix your assistant bumps `versionName` in `app/build.gradle.kts`, rebuilds,
+re-runs the app, and re-checks the issue on that new version. Let it. Intermediate names like
+`codelab-1.1`, `codelab-1.2` are fine, whatever it picks.
+
+The only thing that matters for completion: once **all** the fixes are in, the final build must be
+`codelab-2.0`. That is the version Step 5 measures and the one you submit.
 
 ### 4.1 The crash: Interests tab
 
@@ -168,7 +171,7 @@ MainActivityViewModel, and sync-worker issues gone, and cold start massively red
 emulator the after report may still mention cold-start or first-composition times; those are
 environmental and do not count against you. 🎉
 
-Save the codelab-2.0 report (text file or screenshot), same as in Step 3.
+Take a screenshot of the codelab-2.0 report, same as in Step 3.
 
 The same story is visible in the [Kotzilla Console](https://console.kotzilla.io/): open the
 **Dashboard**, switch the version filter between `codelab-1.0` and `codelab-2.0`, and watch the

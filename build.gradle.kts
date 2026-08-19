@@ -44,3 +44,22 @@ plugins {
 //    alias(libs.plugins.allOpen) apply false
 //    alias(libs.plugins.module.graph) apply true // Plugin applied to allow module graph generation
 }
+
+// The Kotzilla Gradle plugin auto-adds `kotzilla-sdk` to plain modules and `kotzilla-sdk-compose`
+// to Compose ones. Both publish the `io.kotzilla:kotzilla-sdk-runtime` capability. Gradle
+// substitutes one for the other on runtime classpaths, but rejects the pair on unit-test
+// classpaths, which breaks `:feature:*:test`. Pick the Compose variant everywhere.
+subprojects {
+    configurations.configureEach {
+        resolutionStrategy.capabilitiesResolution
+            .withCapability("io.kotzilla:kotzilla-sdk-runtime") {
+                select(
+                    candidates.first {
+                        val id = it.id
+                        id is org.gradle.api.artifacts.component.ModuleComponentIdentifier &&
+                            id.module == "kotzilla-sdk-compose"
+                    },
+                )
+            }
+    }
+}
