@@ -164,15 +164,6 @@ is a real UX decision, not just a metric: the delay *is* the animation.
 
 This one is optional. Leaving it unfixed does not count against your completion.
 
-### Along the way: component lifetimes
-
-While root-causing the slow screens and transitions, your assistant will notice in the dependency
-trees that data-layer components (repositories, DAOs, the network source) are **recreated on every
-resolution** instead of being shared. Correcting those Koin lifetimes is part of the fix: let it
-happen. You can see the churn yourself in the Console: open a session's **Timeline View** and its
-**Memory Graph**, and watch the *created* count climb for components that should have a single
-instance in memory.
-
 ## Step 5: Capture the "after" session
 
 1. In `app/build.gradle.kts`, change `versionName` from `codelab-1.0` to `codelab-2.0`.
@@ -212,7 +203,7 @@ server-side. Every completer gets a shout-out, and completions enter a prize dra
 
 - Registering an app and configuring an SDK entirely through MCP.
 - Turning runtime symptoms (a crash, a slow start, an ANR, frozen screens, background stalls,
-  memory churn) into component-level evidence with the Kotzilla Platform.
+  slow transitions) into component-level evidence with the Kotzilla Platform.
 - Letting an AI assistant fix issues from real dependency graphs and session timings instead of
   guessing from code.
 - Proving a fix with version-scoped before/after reports, the same mechanism you would use as a
