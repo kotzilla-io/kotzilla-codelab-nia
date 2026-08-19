@@ -207,9 +207,19 @@ You are done when this holds:
 
 The last two are the ones to read as magnitudes. Everything else should simply stop appearing.
 
-Anything in the list that is not in that table is not something you failed to fix: the optional
-slow transition from 4.3, or a slow `ForYouRoute` on a launch whose database started empty and was
-still filling. 🎉
+**The comparison will probably also report something as regressed or new. That does not mean you
+broke it.** Two show up regularly:
+
+- **`ForYouRoute` slow, sometimes an ANR.** The For You feed cannot render until the first sync
+  fills the database. If any of your launches started from an empty database, that one session
+  spent seconds waiting on it. Nothing you wrote is involved.
+- **`okhttp3.Call$Factory` blocking a background thread.** This is new only because your app is now
+  fast enough to reach image loading inside the measured window. In `codelab-1.0` it sat behind
+  eleven seconds of blocking, so it never got measured. Going faster made it visible.
+
+Both are artefacts of measuring a small number of runs on an emulator, and neither is in the table
+above. The same goes for the optional slow transition from 4.3 if you skipped it. Read the table,
+not the totals. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 
