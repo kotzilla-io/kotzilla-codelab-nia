@@ -166,10 +166,16 @@ This one is optional. Leaving it unfixed does not count against your completion.
 
 ## Step 5: Capture the "after" session
 
-1. In `app/build.gradle.kts`, change `versionName` from `codelab-1.0` to `codelab-2.0`.
+1. In `app/build.gradle.kts`, set `versionName` to `codelab-2.0` (you will be on whatever
+   intermediate version Step 4 left you on, not on `codelab-1.0`), and bump `versionCode`.
 2. Rebuild and install.
-3. Run the Step 2 navigation path **twice** (this time Interests should not crash).
-4. Background or close the app, then wait about a minute.
+3. **Launch the app once and wait for the feed to fill with articles, then close it.** The first
+   launch on a fresh install downloads the article catalog, and the **For You** screen cannot
+   render until the topics land. Measure that launch and you record a network wait as if it were
+   your code: it shows up as a slow screen or even an ANR on `ForYouRoute`, on a screen you never
+   touched. This warm-up run is not measured, so leave it out of your report.
+4. Now run the Step 2 navigation path **twice** (this time Interests should not crash).
+5. Background or close the app, then wait about a minute.
 
 ## Step 6: The before/after comparison
 
@@ -179,9 +185,13 @@ This one is optional. Leaving it unfixed does not count against your completion.
 Your assistant pulls both version-scoped reports through MCP and builds the comparison. **Success is
 the delta, not a green banner**: crashes down to zero, ANRs down to zero, the MainActivity,
 MainActivityViewModel, and sync-worker issues gone, and cold start massively reduced. The report
-can still be FAIL and you can still have finished: a slower emulator keeps reporting cold-start and
-first-composition times that are environmental, and the slow transition from 4.3 is optional.
-Neither counts against you. 🎉
+can still be FAIL and you can still have finished. None of these count against you:
+
+- Cold-start and first-composition times on a slow emulator. Environmental.
+- The slow transition from 4.3. Optional.
+- A slow screen or ANR on `ForYouRoute`. That is the first-run catalog download, which is why
+  Step 5 asks for a warm-up launch. If you see it, you measured a launch that started with an
+  empty database. 🎉
 
 Take a screenshot of the codelab-2.0 report, same as in Step 3.
 
