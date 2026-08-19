@@ -174,19 +174,13 @@ that gets compared.
 
 ## Step 6: Check what you fixed
 
-Do not ask for another health report. A report grades the whole app against absolute thresholds,
-and on an emulator it says FAIL whatever you do, because cold start alone sits above the line. The
-question is whether the issues you were given are gone. Ask that:
+The check is a comparison: every issue that was in `codelab-1.0`, against your latest version.
 
 > "On Kotzilla, take each issue from codelab-1.0 and tell me whether it is gone in my latest
 > version, or how far it dropped."
 
-Scoping it to `codelab-1.0`'s issues is what keeps the answer useful. Ask for a general comparison
-instead and you get every difference between two small samples on one emulator, including things
-you never caused, and you have to sort them out yourself.
-
-Each issue records the versions it was seen on, so "gone" is a fact rather than a judgement. You
-are done when this holds:
+Each issue records which versions it appeared on, so "gone" is a fact rather than a judgement.
+Expect this:
 
 | From `codelab-1.0` | Expected |
 | --- | --- |
@@ -198,12 +192,13 @@ are done when this holds:
 | `ListenableWorker` blocking a background thread (~2s) | Gone, or down to a few hundred ms |
 | Cold startup (~15s) | Down to a few seconds. Usually still listed: an emulator crosses that threshold on its own. |
 
-Read the last two as magnitudes. The rest should simply stop appearing.
+Read the last two rows as magnitudes. The rest should stop appearing.
 
-Two things may still show up that you did not cause: a slow `ForYouRoute` on a launch whose
-database was still filling for the first time, and `okhttp3.Call$Factory` on a background thread,
-which becomes visible only because your app is now fast enough to reach image loading inside the
-measured window. Neither is in the table. 🎉
+Judge yourself on that table, not on the report's overall status, which grades the whole app
+against absolute thresholds and stays FAIL on an emulator whatever you do. Two other entries may
+appear that you did not cause: a slow `ForYouRoute` on a launch whose database was still filling
+for the first time, and `okhttp3.Call$Factory` on a background thread, visible only because your
+app is now fast enough to reach image loading inside the measured window. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 
