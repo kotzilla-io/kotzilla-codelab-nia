@@ -174,13 +174,14 @@ that gets compared.
 
 ## Step 6: Check what you fixed
 
-The check is a comparison: every issue that was in `codelab-1.0`, against your latest version.
+The check is a comparison: the issues you were given in `codelab-1.0`, against your latest version.
 
-> "On Kotzilla, take each issue from codelab-1.0 and tell me whether it is gone in my latest
-> version, or how far it dropped."
+> "On Kotzilla, compare codelab-1.0 with my latest version, for the crash on Interests and the
+> issues on MainActivity, MainActivityViewModel and ListenableWorker. For each one: gone, or how
+> far did it drop?"
 
-Each issue records which versions it appeared on, so "gone" is a fact rather than a judgement.
-Expect this:
+Those four components carry everything that was planted. Each issue records which versions it
+appeared on, so "gone" is a fact rather than a judgement. Expect this:
 
 | From `codelab-1.0` | Expected |
 | --- | --- |
@@ -194,13 +195,8 @@ Expect this:
 
 Read the last two rows as magnitudes. The rest should stop appearing.
 
-Judge yourself on that table rather than on the report's overall status. The report is a release
-gate: it grades the whole app against production thresholds, which is what you want in CI, but here
-you are asking a narrower question, and a desktop emulator is slow enough at cold start to trip the
-gate on its own. Two other entries may appear that you did not cause: a slow `ForYouRoute` on a
-launch whose database was still filling for the first time, and `okhttp3.Call$Factory` on a
-background thread, visible only because your app is now fast enough to reach image loading inside
-the measured window. 🎉
+We are not using the report status here, only the table above. Your build can still carry other
+issues that keep the report failing, and that is fine: they are not what you were asked to fix. 🎉
 
 **Take a screenshot of that comparison.** It is what you send in.
 
