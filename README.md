@@ -180,6 +180,8 @@ The check is a comparison: the issues you were given in `codelab-1.0`, against y
 > issues on MainActivity, MainActivityViewModel and ListenableWorker. For each one: gone, or how
 > far did it drop?"
 
+If your latest version does not show up yet, wait a minute and ask again.
+
 Those four components carry everything we introduced. Each issue records which versions it
 appeared on, so "gone" is a fact, not an opinion. Expect this:
 
