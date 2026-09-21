@@ -34,6 +34,9 @@ The Hilt to Koin migration deep-dive lives in [`docs/KOIN_COMPILER_PLUGIN.md`](d
 claude mcp add kotzilla --transport http https://mcp.kotzilla.io/mcp
 ```
 
+   **Using Android Studio with the [Koin IDE Plugin](https://plugins.jetbrains.com/plugin/26131-koin-dependency-injection-official-)?**
+   The **Connect AI agents** popup wires up the MCP server in one click, no CLI needed.
+
    For other clients, see the [MCP setup guide](https://doc.kotzilla.io/docs/getstartedCustom/mcpSetup).
    On first use, the server opens a browser auth flow with the account from step 4.
 
@@ -57,11 +60,10 @@ Build and install the app (`./gradlew :app:installDemoDebug`), then run this nav
    real, and it is being measured.
 2. On the **For You** screen, follow a topic and scroll the feed.
 3. Open **Search** (the magnifier, top left) and search for "compose".
-4. Open the **Saved** tab.
+4. Open the **Saved** tab. Nothing happens here, it is just part of the path.
 5. Open the **Interests** tab. The app crashes. 💥 That crash is part of the codelab.
 6. **Relaunch the app** and let it load: this uploads the crashed session. Then send the app to the
    background (home button) or close it.
-7. Wait about a minute for the session to be processed.
 
 ## Step 3: The "before" report
 
@@ -69,10 +71,13 @@ Ask your assistant:
 
 > "Generate a Kotzilla report for this app, version codelab-1.0."
 
+The report comes back in your assistant's chat, as text. There is no file to download and no
+dashboard link to follow.
+
 You get a **FAIL** report listing around a dozen detected issues: a crash, a slow cold start, an
 ANR, slow screens, and blocking components. The exact count varies with your device and how you
-navigated, so do not worry if you see a few more or fewer. If the report shows no data yet, wait
-another minute and ask again.
+navigated, so do not worry if you see a few more or fewer. Sessions usually land within seconds.
+If the report shows no data, wait a minute and ask again.
 
 **Take a screenshot of this report.** You will attach it when you complete the codelab.
 
@@ -165,7 +170,7 @@ Optional. Leaving it does not count against your completion.
    launch after installing a new build is slower because the runtime is still compiling it, so the
    second run is the one that measures your code. If a run gets interrupted, bump the version and
    redo this step: sessions stick to a version permanently.
-4. Background or close the app, then wait about a minute.
+4. Background or close the app.
 
 ## Step 6: Check what you fixed
 
