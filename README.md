@@ -34,11 +34,12 @@ The Hilt to Koin migration deep-dive lives in [`docs/KOIN_COMPILER_PLUGIN.md`](d
 claude mcp add kotzilla --transport http https://mcp.kotzilla.io/mcp
 ```
 
-   **Using Android Studio with the [Koin IDE Plugin](https://plugins.jetbrains.com/plugin/26131-koin-dependency-injection-official-)?**
-   The **Connect AI agents** popup wires up the MCP server in one click, no CLI needed.
-
    For other clients, see the [MCP setup guide](https://doc.kotzilla.io/docs/getstartedCustom/mcpSetup).
    On first use, the server opens a browser auth flow with the account from step 4.
+
+   > **Note:** on Android Studio with the
+   > [Koin IDE Plugin](https://plugins.jetbrains.com/plugin/26131-koin-dependency-injection-official-)
+   > installed, the **Connect AI agents** popup does this in one click, no CLI needed.
 
 ---
 
@@ -60,7 +61,7 @@ Build and install the app (`./gradlew :app:installDemoDebug`), then run this nav
    real, and it is being measured.
 2. On the **For You** screen, follow a topic and scroll the feed.
 3. Open **Search** (the magnifier, top left) and search for "compose".
-4. Open the **Saved** tab. Nothing happens here, it is just part of the path.
+4. Open the **Saved** tab, then move straight on. Nothing to do here.
 5. Open the **Interests** tab. The app crashes. 💥 That crash is part of the codelab.
 6. **Relaunch the app** and let it load: this uploads the crashed session. Then send the app to the
    background (home button) or close it.
