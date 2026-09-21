@@ -143,7 +143,7 @@ If your assistant stops after the first one, point it at the rest:
 
 > "Now analyze the background thread issue on the sync worker and fix it."
 
-### 4.3 One more, and this one is not ours
+### 4.3 Slow transitions: the one we did not plant
 
 With the issues we introduced gone, the report still shows a **slow transition** of roughly 700ms
 on `InterestsRoute`, and similar numbers on Search and Saved. We did not add that one. It ships in
