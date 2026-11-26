@@ -80,7 +80,7 @@ ANR, slow screens, and blocking components. The exact count varies with your dev
 navigated, so do not worry if you see a few more or fewer. Sessions usually land within seconds.
 If the report shows no data, wait a minute and ask again.
 
-**Take a screenshot of this report.** You will attach it when you complete the codelab.
+**Keep this report in mind** (or take a screenshot): it is your "before" picture for Step 6.
 
 ## Step 4: Diagnose and fix, issue by issue
 
@@ -95,7 +95,7 @@ session, so after every fix your assistant bumps `versionName` in `app/build.gra
 re-runs the app, and re-checks the issue on that new version. Let it. Intermediate names like
 `codelab-1.1`, `codelab-1.2` are fine, whatever it picks.
 
-The only thing that matters for completion is that your **last** build is the one with all the
+The only thing that matters is that your **last** build is the one with all the
 fixes in it. Step 6 compares `codelab-1.0` against whatever version is newest, so the names in
 between are yours to pick.
 
@@ -158,7 +158,7 @@ number is the clue that one shared cause is behind all of them.
 interactive until it finishes. Overriding `enterTransition`/`exitTransition` to 200ms gets the time
 back. Note this is a real UX decision, not just a metric: the delay *is* the animation.
 
-Optional. Leaving it does not count against your completion.
+Optional.
 
 ## Step 5: Capture the "after" session
 
@@ -201,8 +201,6 @@ The rest should stop appearing.
 We are not using the report status here, only the table above. Your build can still carry other
 issues that keep the report failing, and that is fine: they are not what you were asked to fix. 🎉
 
-**Take a screenshot of that comparison.** It is what you send in.
-
 The same story is visible in the [Kotzilla Console](https://console.kotzilla.io/). Open the
 **Dashboard** and use the version filter to move between `codelab-1.0` and your final version, or
 just read the two panels side by side: the app across all versions against the latest one on its
@@ -213,17 +211,6 @@ own.
 Every version you built along the way is listed, and the health of the newest one is reported
 separately from the app as a whole. The screen table underneath is the same data Step 6 compares,
 per screen, with ANR counts.
-
-## Completing the codelab
-
-Email **codelab@kotzilla.io** with:
-
-- your **app name** as registered on Kotzilla,
-- the **name of your final version**,
-- the Step 3 "before" screenshot and the Step 6 comparison screenshot.
-
-We check the rest server-side, against the same table in Step 6 and nothing else. Every completer
-gets a shout-out, and completions enter a prize draw.
 
 ---
 
